@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ArrowRight, ArrowLeft, ArrowUp } from 'lucide-react-native';
 import { RouteStep } from '@/types/routes';
+import { WebView } from 'react-native-webview';
 
 interface NavigationStepProps {
   step: RouteStep;
@@ -19,22 +20,34 @@ export function NavigationStep({ step, isActive }: NavigationStepProps) {
     }
   };
 
+    const htmlWithStyle = `
+    <div style="font-size: 12px; line-height: 0.7;">
+      ${step.html_instructions}
+    </div>
+  `;
   return (
     <View style={[styles.container, isActive && styles.activeContainer]}>
       <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
-        {getDirectionIcon(step.instruction)}
+        {getDirectionIcon(step.html_instructions)}
       </View>
       
       <View style={styles.content}>
-        <Text style={[styles.instruction, isActive && styles.activeInstruction]}>
-          {step.instruction}
-        </Text>
+      <WebView
+            scalesPageToFit={false}
+      style={{ height: 'auto',backgroundColor:"transparent" }}
+      
+      originWhitelist={['*']}
+      source={{ html:  htmlWithStyle }}
+    />
+        {/* <Text style={[styles.instruction, isActive && styles.activeInstruction]}>
+          {step.html_instructions}
+        </Text> */}
         <View style={styles.details}>
           <Text style={[styles.distance, isActive && styles.activeDetails]}>
-            {step.distance}
+            {step.distance.text}
           </Text>
           <Text style={[styles.duration, isActive && styles.activeDetails]}>
-            {step.duration}
+            {step.duration.text}
           </Text>
         </View>
       </View>

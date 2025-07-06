@@ -1,64 +1,83 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react-native';
 import { NavigationStep } from '@/components/NavigationStep';
 import { RouteService } from '@/services/routeService';
 import { NavigationRoute } from '@/types/routes';
 import { router, useLocalSearchParams } from 'expo-router';
+import { combineAllSteps, fetchDirections, parseWaypointsFromUrl, resolveShortUrl } from '@/services/routeHelper';
 
 export default function NavigationScreen() {
   const params = useLocalSearchParams();
   const routeUrl = params.routeUrl as string;
   const latitudeParam = params.latitude as string;
   const longitudeParam = params.longitude as string;
-
+console.log(params)
+  
   const [route, setRoute] = useState<NavigationRoute | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+   const [routeInfo, setRouteInfo] = useState({})
+   const [routeSteps, setRouteSteps] = useState([])
+
+
+
+  const fetchRouteDetails = async () => {
+    try {
+      setLoading(true);
+      setHasError(false);
+      setErrorMessage('');
+
+      // Validate parameters before making the request
+      if (!routeUrl) {
+        setHasError(true);
+        setErrorMessage('Route is not specified.\nSelect Route from Locations and Routes screen.');
+        return;
+      }
+
+      if (!latitudeParam || !longitudeParam) {
+        setHasError(true);
+        setErrorMessage('Location coordinates are missing');
+        return;
+      }
+
+      const latitude = parseFloat(latitudeParam);
+      const longitude = parseFloat(longitudeParam);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        setHasError(true);
+        setErrorMessage('Invalid location coordinates');
+        return;
+      }
+
+      const routeData = await RouteService.getRouteDetails(routeUrl, latitude, longitude);
+      // const longUrl = await RouteService.expandGoogleMapsUrl(routeUrl)
+      const longUrl= await resolveShortUrl(routeUrl)
+      const wayPoints= await parseWaypointsFromUrl(longUrl)
+      const _route= await fetchDirections(wayPoints)
+      setRouteInfo(_route?.routes?.[0])
+      // console.log(_route?.routes?.[0].legs)
+      setRouteSteps(()=>combineAllSteps(_route?.routes?.[0].legs)||[])
+      // setRoute(_route )
+
+      setRoute(routeData);
+    } catch (error) {
+      console.error('Error loading route:', error);
+      setHasError(true);
+      setErrorMessage('Failed to load route details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
 
   useEffect(() => {
-    const fetchRouteDetails = async () => {
-      try {
-        setLoading(true);
-        setHasError(false);
-        setErrorMessage('');
-
-        // Validate parameters before making the request
-        if (!routeUrl) {
-          setHasError(true);
-          setErrorMessage('Route is not specified.\nSelect Route from Locations and Routes screen.');
-          return;
-        }
-
-        if (!latitudeParam || !longitudeParam) {
-          setHasError(true);
-          setErrorMessage('Location coordinates are missing');
-          return;
-        }
-
-        const latitude = parseFloat(latitudeParam);
-        const longitude = parseFloat(longitudeParam);
-
-        if (isNaN(latitude) || isNaN(longitude)) {
-          setHasError(true);
-          setErrorMessage('Invalid location coordinates');
-          return;
-        }
-
-        const routeData = await RouteService.getRouteDetails(routeUrl, latitude, longitude);
-        setRoute(routeData);
-      } catch (error) {
-        console.error('Error loading route:', error);
-        setHasError(true);
-        setErrorMessage('Failed to load route details');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchRouteDetails();
   }, [routeUrl, latitudeParam, longitudeParam]);
 
@@ -67,7 +86,10 @@ export default function NavigationScreen() {
     // In a real app, you would start location tracking here
     router.push({
       pathname: '/(tabs)/(navigator)/navigateMap',
-      params
+      params:{
+        target:JSON.stringify(params),
+        polyLine:routeInfo?.overview_polyline?.points,
+      }
     });
     // simulateNavigation();
   };
@@ -109,9 +131,10 @@ export default function NavigationScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading route...</Text>
+          <ActivityIndicator size="large" color="#0000ff" style={StyleSheet.absoluteFill} />
+        {hasError && <Text style={styles.errorText}>{hasError}</Text>}
         </View>
       </SafeAreaView>
     );
@@ -143,8 +166,12 @@ export default function NavigationScreen() {
     );
   }
 
+
+
+
   return (
     <SafeAreaView style={styles.container}>
+
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <ArrowLeft size={24} color="#2563eb" />
@@ -158,15 +185,15 @@ export default function NavigationScreen() {
       <View style={styles.routeInfo}>
         <View style={styles.routeStats}>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{route.totalDistance}</Text>
+            <Text style={styles.statValue}>{(routeInfo?.legs?.reduce((acc, leg) => acc + leg.distance.value, 0) / 1000).toFixed(2)} km</Text>
             <Text style={styles.statLabel}>Distance</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{route.totalDuration}</Text>
+            <Text style={styles.statValue}>{Math.round(routeInfo.legs.reduce((acc, leg) => acc + leg.duration.value, 0) / 60)} mins</Text>
             <Text style={styles.statLabel}>Duration</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{route.steps.length}</Text>
+            <Text style={styles.statValue}>{routeInfo.legs.length}</Text>
             <Text style={styles.statLabel}>Steps</Text>
           </View>
         </View>
@@ -200,7 +227,9 @@ export default function NavigationScreen() {
       </View>
 
       <FlatList
-        data={route.steps}
+        // data={route.steps}
+        data={routeSteps}
+
         renderItem={renderStep}
         keyExtractor={(item, index) => `step-${index}`}
         showsVerticalScrollIndicator={false}
