@@ -177,7 +177,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <GoogleMaps.View
-          mapp
+          map
           ref={ref}
           style={[StyleSheet.absoluteFill, { paddingTop: 50 }]}
           cameraPosition={cameraPosition}
@@ -186,8 +186,12 @@ export default function HomeScreen() {
             compassEnabled: true,
           }}
           userLocation={{
+            // coordinates: {
+            //   latitude: parseFloat(location.latitude as string), longitude: parseFloat(location.longitude as string)
+            // },
             followUserLocation: true,
           }}
+        
           properties={{
 
             // isBuildingEnabled: true,
@@ -198,7 +202,7 @@ export default function HomeScreen() {
             // isTrafficEnabled: true,
             minZoomPreference: 1,
             maxZoomPreference: 20,
-
+            
 
           }}
 

@@ -1,6 +1,5 @@
 import polyline from '@mapbox/polyline';
 
-
 /**
  * Part 1a: Resolves a short goo.gl link to its final destination URL.
  * We use fetch because it automatically follows redirects. The final URL
@@ -14,7 +13,7 @@ const resolveShortUrl = async (shortUrl: string) => {
   if (!response.ok) {
     throw new Error('Failed to resolve the short URL.');
   }
-//   console.log('Resolved to:', response.url);
+  //   console.log('Resolved to:', response.url);
   return response.url;
 };
 
@@ -62,7 +61,7 @@ const parseWaypointsFromUrl = (longUrl: string) => {
     );
   }
 
-//   console.log('Parsed Waypoints:', waypoints);
+  //   console.log('Parsed Waypoints:', waypoints);
   return waypoints;
 };
 /**
@@ -80,15 +79,15 @@ const fetchDirections = async (waypoints: string[]) => {
 
   let apiUrl = `https://maps.googleapis.com/maps/api/directions/json?origin=${encodeURIComponent(
     origin
-  )}&destination=${encodeURIComponent(
-    destination
-  )}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+  )}&destination=${encodeURIComponent(destination)}&key=${
+    process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
+  }`;
+
 
   if (intermediateWaypoints) {
     apiUrl += `&waypoints=${encodeURIComponent(intermediateWaypoints)}`;
   }
 
-  //   console.log('API URL:', apiUrl);
   const response = await fetch(apiUrl);
   const data = await response.json();
 
@@ -104,27 +103,33 @@ const fetchDirections = async (waypoints: string[]) => {
   return data;
 };
 
-function combineAllSteps(route:any[]) {
+function combineAllSteps(route: any[]) {
   // Tüm step'leri birleştireceğimiz dizi
   const allSteps: any[] = [];
-  
+
   // Her leg için steps dizisini allSteps'e ekleyelim
-  route.forEach(leg => {
+  route.forEach((leg) => {
     if (leg.steps && Array.isArray(leg.steps)) {
       allSteps.push(...leg.steps);
     }
   });
-//   console.log("allSteps",JSON.stringify(allSteps, null, 2))
+  //   console.log("allSteps",JSON.stringify(allSteps, null, 2))
   return allSteps;
 }
-const polyLineDecoder=(encodedPolyline:string)=>{
-
-    const decodedCoordinates = polyline.decode(encodedPolyline).map(([latitude, longitude]) => ({
-        latitude,
-        longitude,
+const polyLineDecoder = (encodedPolyline: string) => {
+  const decodedCoordinates = polyline
+    .decode(encodedPolyline)
+    .map(([latitude, longitude]) => ({
+      latitude,
+      longitude,
     }));
-    return decodedCoordinates;
-}
+  return decodedCoordinates;
+};
 
-
-export { resolveShortUrl, parseWaypointsFromUrl, fetchDirections,combineAllSteps,polyLineDecoder };
+export {
+  resolveShortUrl,
+  parseWaypointsFromUrl,
+  fetchDirections,
+  combineAllSteps,
+  polyLineDecoder,
+};

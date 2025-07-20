@@ -12,8 +12,7 @@ export default function NavigationScreen() {
   const routeUrl = params.routeUrl as string;
   const latitudeParam = params.latitude as string;
   const longitudeParam = params.longitude as string;
-console.log(params)
-  
+ 
   const [route, setRoute] = useState<NavigationRoute | null>(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isNavigating, setIsNavigating] = useState(false);
