@@ -82,7 +82,7 @@ const fetchDirections = async (waypoints: string[]) => {
     origin
   )}&destination=${encodeURIComponent(
     destination
-  )}&key=${'AIzaSyDIjkytYRqYYzIZjEQRrdWytHdmAx3Tf3o'}`;
+  )}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
 
   if (intermediateWaypoints) {
     apiUrl += `&waypoints=${encodeURIComponent(intermediateWaypoints)}`;
