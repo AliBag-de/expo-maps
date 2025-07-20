@@ -4,6 +4,13 @@ android/
 ios/
 build/
 .bolt/
+dist/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+app.json
 
 # expo
 .expo/

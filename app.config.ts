@@ -1,5 +1,7 @@
-{
-  "expo": {
+import { ExpoConfig, ConfigContext } from 'expo/config';
+
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
     "name": "Route Tester",
     "slug": "route-tester",
     "version": "1.0.0",
@@ -30,7 +32,7 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "AIzaSyDIjkytYRqYYzIZjEQRrdWytHdmAx3Tf3o"
+          "apiKey": process.env.GOOGLE_MAPS_API_KEY
         }
       }
     },
@@ -67,5 +69,5 @@
     "updates": {
       "url": "https://u.expo.dev/8e370cf7-f08e-45bc-b738-3c19422b6e94"
     }
-  }
-}
+  
+});

@@ -18,6 +18,8 @@ export default function HomeScreen() {
   // const location=JSON.parse(target as string)
 
   const [locationIndex, setLocationIndex] = useState(0);
+    const [locationPermission,setLocationPermission]=useState(false)
+
   const ref = useRef<AppleMaps.MapView>(null);
   const location = JSON.parse(target as string)
   const polylines = polyLineDecoder(polyLine as string)
@@ -179,9 +181,7 @@ export default function HomeScreen() {
           ref={ref}
           style={[StyleSheet.absoluteFill, { paddingTop: 50 }]}
           cameraPosition={cameraPosition}
-          
           uiSettings={{
-
             myLocationButtonEnabled: true,
             compassEnabled: true,
           }}
@@ -194,7 +194,7 @@ export default function HomeScreen() {
             // isIndoorEnabled: true,
             // mapType: GoogleMapsMapType.TERRAIN,
             // selectionEnabled: true,
-            isMyLocationEnabled: true, // requires location permission
+            isMyLocationEnabled: locationPermission, // requires location permission
             // isTrafficEnabled: true,
             minZoomPreference: 1,
             maxZoomPreference: 20,
