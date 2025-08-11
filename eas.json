@@ -12,8 +12,10 @@
     "preview": {
       "distribution": "internal",
       "channel": "preview",
-      "environment": "preview"
-
+      "environment": "preview",
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "AIzaSyCGG6f1_s2hFiKU92pkyQ1sHpdpo8f8YG8"
+      }
     },
     "production": {
       "autoIncrement": true

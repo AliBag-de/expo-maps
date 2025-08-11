@@ -1,4 +1,5 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
+require('dotenv').config();
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -31,6 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "config": {
+        ...config.extra,
         "googleMaps": {
           "apiKey": process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
         }
